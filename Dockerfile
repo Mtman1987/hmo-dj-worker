@@ -14,10 +14,10 @@ RUN yt-dlp --version
 
 WORKDIR /app
 
-COPY worker/package*.json ./
+COPY package*.json ./
 RUN npm ci --omit=dev
 
-COPY worker/src ./src
+COPY src ./src
 
 EXPOSE 3002
 

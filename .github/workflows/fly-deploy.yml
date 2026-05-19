@@ -1,0 +1,36 @@
+name: Fly Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy hmo-dj-worker
+    runs-on: ubuntu-latest
+    concurrency: fly-deploy-hmo-dj-worker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly
+        env:
+          FLY_API_TOKEN_WORKER: ${{ secrets.FLY_API_TOKEN_WORKER }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          TOKEN="${FLY_API_TOKEN_WORKER:-$FLY_API_TOKEN}"
+          if [ -z "$TOKEN" ]; then
+            echo "Set FLY_API_TOKEN_WORKER or FLY_API_TOKEN in this repository's GitHub Actions secrets."
+            exit 1
+          fi
+
+          flyctl deploy --remote-only --config fly.toml --access-token "$TOKEN"
